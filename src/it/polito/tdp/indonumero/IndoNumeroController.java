@@ -15,15 +15,16 @@ import javafx.scene.layout.HBox;
 
 public class IndoNumeroController {
 	
-	private int NMAX = 100;
-	private int TMAX = 7; // ogni tentativo butto via (log in base 2 di 100)
+	private Model model;
+	
+	
+	
 
-	private int segreto; // numero da indovinare
-	private int tentativi; // tentativi già fatti
+    public void setModel(Model model) {
+		this.model = model;
+	}
 
-	private boolean inGame = false; // c'è una partita in corso?
-
-    @FXML // ResourceBundle that was given to the FXMLLoader
+	@FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
 
     @FXML // URL location of the FXML file that was given to the FXMLLoader
@@ -50,25 +51,25 @@ public class IndoNumeroController {
     @FXML
     void handleNuova(ActionEvent event) {
     	
-	    	this.segreto = (int) (Math.random()*NMAX +1);  // mi da un double compreso tra 0 e 100 (escluso) -> lo trasformo in int e aggiungo 1
-	   	this.tentativi = 0;
-	    this.inGame = true; // è iniziata la partita
+	    model.newGame();
 	   	 
 	 	btnNuova.setDisable(true); // non mi serve il bottone di nuovaPartita -> disabilito
 	    boxGioco.setDisable(false); // abilito il box di gioco
-	    txtCur.setText(String.format("%d", this.tentativi)); // metto a 0 il numero di tentativi .. Intero->Stringa
-	    txtMax.setText(String.format("%d", this.TMAX));
+	    txtCur.setText(String.format("%d", model.getTentativi())); // metto a 0 il numero di tentativi .. Intero->Stringa
+	    txtMax.setText(String.format("%d", model.getTMAX()));
 	    
 	    txtLog.clear();
 	    txtTentativo.clear();
 	    
 	    txtLog.setText(String.format("Indovina un numero tra %d e %d\n",
-	    			1, NMAX));
+	    			1, model.getNMAX()));
 
     }
 
     @FXML
     void handleProva(ActionEvent event) {
+    	
+    	// ACQUISIZIONE E VERIFICA DEI DATI
     	
 	    	String numS = txtTentativo.getText(); // scritto dall'utente nella casella di testo
 	    	
@@ -78,55 +79,45 @@ public class IndoNumeroController {
 		 		return;
 		}
 	   	
+		// la conversione STRINGA->INTERO è compito del CONTROLLER, il MODELLO deve lavorare con oggetti non testi.
 	    try {
 	    		int num = Integer.parseInt(numS) ; // -> eccezione se metto stringa.. TRY per non fare bloccare il programma
 	    		
 	    		// il numero era effettivamente un intero
-	    		if(num < 1 || num > 100) {
+	    		if(!model.valoreValido(num)) {
 	    			txtLog.appendText("Numero fuori dall'intervallo consentito!\n");
 	    			return; // esco dal metodo senza incrementare i tentativi
 	    		}
 	    		
-	    		if(num == this.segreto) {
+	    		int risultato =  model.tentativo(num);
+	    		txtCur.setText(String.format("%d", model.getTentativi()));
+	    		
+	    		if(risultato == 0) {
 	    			// utente ha indovinato (termina partita e ne inizia una nuova)
-	    			
 	    			txtLog.appendText("Hai vinto!\n");
+	    		} else if(risultato < 0) {
+	    			//troppo basso
+				txtLog.appendText("Troppo basso\n");
+	    		} else {
+	    			// troppo alto
+				txtLog.appendText("Troppo alto\n");
+			}
+	    		
+	    		if(!model.isInGame()) {
+	    			// la parita è finita (vittoria o sconfitta)
 	    			
+	    			if( risultato != 0 ) {
+	    				txtLog.appendText("Hai perso!\n");
+	    			txtLog.appendText(
+	    					String.format("Il numero segreto era: %d\n", 
+	    							model.getSegreto()));
+	    			}
 	    			//chiudo partita
 	    			btnNuova.setDisable(false);
 	    			boxGioco.setDisable(true);
-	    			this.inGame = false;
-	    			
-	    			
-	    		} else {
-	    			// tentativo errato
-	    			this.tentativi++;
-	    			txtCur.setText(String.format("%d", this.tentativi)); // modifica l'interfaccia
-	    			
-	    			// 1. era l'ultimo tentativo
-	    			if(this.tentativi == this.TMAX) {
-	    				// ha perso
-	    				txtLog.appendText(
-	    						String.format("Hai perso! Il numero era: %d\n", 
-	    								this.segreto));
-	    				//chiudo partita
-		    			btnNuova.setDisable(false);
-		    			boxGioco.setDisable(true);
-		    			this.inGame = false;
-	    			} else { //2.
-	    				// sono ancora in gioco
-	    				if(num<segreto) {
-	    					//troppo basso
-	    					txtLog.appendText("Troppo basso\n");
-	    				} else {
-	    					// troppo alto
-	    					txtLog.appendText("Troppo alto\n");
-	    				}
-	    			}
-	    			
 	    		}
-	   	 
-	    
+	    		
+	    	
 	    } catch(NumberFormatException ex) {
 	   		txtLog.appendText("Il dato inserito non è numerico\n");
 	   		return;

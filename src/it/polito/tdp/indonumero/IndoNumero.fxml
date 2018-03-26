@@ -29,9 +29,9 @@
                         <Insets left="20.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="txtCur" disable="true" prefColumnCount="2" />
+                  <TextField fx:id="txtCur" editable="false" prefColumnCount="2" />
                   <Label text="/" />
-                  <TextField fx:id="txtMax" disable="true" prefColumnCount="2" />
+                  <TextField fx:id="txtMax" editable="false" prefColumnCount="2" />
                </children>
                <VBox.margin>
                   <Insets />
