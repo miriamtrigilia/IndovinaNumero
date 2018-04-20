@@ -2,14 +2,19 @@ package it.polito.tdp.indonumero;
 
 import java.security.InvalidParameterException;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 public class Model {
 	
 	private int NMAX = 100;
 	private int TMAX = 7; // ogni tentativo butto via (log in base 2 di 100)
 
+	
 	private int segreto; // numero da indovinare
-	private int tentativi; // tentativi già fatti
-
+	// private int tentativi; // tentativi già fatti
+	private IntegerProperty tentativi = new SimpleIntegerProperty(); // intero OSSERVABILE.. !!SIMPLE!!
+	
 	private boolean inGame = false; // c'è una partita in corso?
 
 	public Model() {
@@ -22,7 +27,7 @@ public class Model {
 	public void newGame() {
 		
 		this.segreto = (int) (Math.random()*NMAX +1);  // mi da un double compreso tra 0 e 100 (escluso) -> lo trasformo in int e aggiungo 1
-	   	this.tentativi = 0;
+	   	this.tentativi.set(0); // aggiorna tutti gli osservatori (le altre classi)
 	    this.inGame = true; // è iniziata la partita
 		
 	}
@@ -42,9 +47,9 @@ public class Model {
 			throw new InvalidParameterException("Tentativo fuori range");
 		}
 		
-		this.tentativi++;
+		this.tentativi.set(this.tentativi.get()+1);
 		
-		if(this.tentativi == this.TMAX) 
+		if(this.tentativi.get() == this.TMAX) 
 			this.inGame = false;
 		
 		if(t == this.segreto) {
@@ -71,10 +76,6 @@ public class Model {
 	public boolean isInGame() {
 		return inGame;
 	}
-	
-	public int getTentativi() {
-		return this.tentativi;
-	}
 
 	public int getNMAX() {
 		return NMAX;
@@ -87,7 +88,23 @@ public class Model {
 	public int getSegreto() {
 		return this.segreto;
 	}
+
+	public final IntegerProperty tentativiProperty() { // restituisce la proprerty come oggetto
+		return this.tentativi;
+	}
 	
+	// get e set fanno si che la property dall'esterno sia invisibile, vedo solo un int tentativi.
+	
+	public final int getTentativi() {
+		return this.tentativiProperty().get();
+	}
+	
+	/*
+	public final void setTentativi(final int tentativi) {
+		this.tentativiProperty().set(tentativi);
+	}
+	* è una property di solo lettura
+	*/
 	
 
 }

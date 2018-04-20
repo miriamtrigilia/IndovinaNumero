@@ -12,17 +12,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.util.converter.NumberStringConverter;
 
 public class IndoNumeroController {
 	
-	private Model model;
-	
-	
-	
-
-    public void setModel(Model model) {
-		this.model = model;
-	}
+	private Model model; // funzione alla fine
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -55,7 +49,7 @@ public class IndoNumeroController {
 	   	 
 	 	btnNuova.setDisable(true); // non mi serve il bottone di nuovaPartita -> disabilito
 	    boxGioco.setDisable(false); // abilito il box di gioco
-	    txtCur.setText(String.format("%d", model.getTentativi())); // metto a 0 il numero di tentativi .. Intero->Stringa
+	    // txtCur.setText(String.format("%d", model.getTentativi())); // metto a 0 il numero di tentativi .. Intero->Stringa
 	    txtMax.setText(String.format("%d", model.getTMAX()));
 	    
 	    txtLog.clear();
@@ -90,7 +84,7 @@ public class IndoNumeroController {
 	    		}
 	    		
 	    		int risultato =  model.tentativo(num);
-	    		txtCur.setText(String.format("%d", model.getTentativi()));
+	    		//txtCur.setText(String.format("%d", model.getTentativi()));
 	    		
 	    		if(risultato == 0) {
 	    			// utente ha indovinato (termina partita e ne inizia una nuova)
@@ -135,6 +129,14 @@ public class IndoNumeroController {
         assert txtLog != null : "fx:id=\"txtLog\" was not injected: check your FXML file 'IndoNumero.fxml'.";
 
     }
+    
+    public void setModel(Model model) {
+		this.model = model;
+		
+		txtCur.textProperty().bindBidirectional(model.tentativiProperty(), new NumberStringConverter()); // chiedo il riferimento alla proprietà che determina un valore di testo(oggetto interfaccia).. e la lego (bind) ad un valore osservabile creato in model 
+		// tutte le volte che il modello modificherà questa proprietà la vista verrà aggiornata modificando il valore contenuto 
+		// bindBidirectional serve per convertire Stringa a Intero
+	}
 }
 
 
